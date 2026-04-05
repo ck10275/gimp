@@ -1,5 +1,6 @@
 Test 1 - Undo single operation
 
+
 #include <glib.h>
 #include "core/gimpimage.h"
 
