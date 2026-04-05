@@ -1,4 +1,4 @@
-Test 1 - Undo single operation
+//Test 1 - Undo single operation
 
 
 #include <glib.h>
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     return g_test_run();
 }
 
-Test 2 - Redo after Undo
+//Test 2 - Redo after Undo
 
 #include <glib.h>
 #include "core/gimpimage.h"
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     return g_test_run();
 }
 
-Test 3 - Multiple Undos
+//Test 3 - Multiple Undos
 
 #include <glib.h>
 #include "core/gimpimage.h"
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
     return g_test_run();
 }
 
-Test 4 - Redo WithOUT Undo
+//Test 4 - Redo WithOUT Undo
 
 #include <glib.h>
 #include "core/gimpimage.h"
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
     return g_test_run();
 }
 
-Test 5 - Undo Empty Stack
+//Test 5 - Undo Empty Stack
 
 #include <glib.h>
 #include "core/gimpimage.h"
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
     return g_test_run();
 }
 
-Test 6 - Clear Redo After New Action
+//Test 6 - Clear Redo After New Action
 
 #include <glib.h>
 #include "core/gimpimage.h"
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
     return g_test_run();
 }
 
-Test 7 -Preserve Dimensions
+//Test 7 -Preserve Dimensions
 
 #include <glib.h>
 #include "core/gimpimage.h"
@@ -196,7 +196,7 @@ int main(int argc, char **argv)
     return g_test_run();
 }
 
-Test 8 - Reorder Corrections
+//Test 8 - Reorder Corrections
 
 #include <glib.h>
 #include "core/gimpimage.h"

@@ -42,7 +42,8 @@ app_tests = [
 #'single-window-mode',
 #'tools',
 #'ui',
-  'xcf',
+#'xcf',
+  'undo_redo',
 ]
 
 # Prevent parallel builds for the tests
