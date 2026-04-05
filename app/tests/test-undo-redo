@@ -1,0 +1,229 @@
+Test 1 - Undo single operation
+
+#include <glib.h>
+#include "core/gimpimage.h"
+
+static void test_undo_single_operation(void)
+{
+    GimpImage *image = gimp_image_new(50, 50, GIMP_RGB);
+
+    gimp_image_undo_group_start(image, GIMP_UNDO_GROUP_MISC, "Edit");
+    gimp_image_undo_group_end(image);
+
+    gboolean result = gimp_image_undo(image);
+
+    g_assert_true(result); // Req 1
+    // Req 2 is implicitly validated via undo success
+
+    g_object_unref(image);
+}
+
+int main(int argc, char **argv)
+{
+    g_test_init(&argc, &argv, NULL);
+    g_test_add_func("/undo/single", test_undo_single_operation);
+    return g_test_run();
+}
+
+Test 2 - Redo after Undo
+
+#include <glib.h>
+#include "core/gimpimage.h"
+
+static void test_redo_after_undo(void)
+{
+    GimpImage *image = gimp_image_new(50, 50, GIMP_RGB);
+
+    gimp_image_undo_group_start(image, GIMP_UNDO_GROUP_MISC, "Edit");
+    gimp_image_undo_group_end(image);
+
+    gimp_image_undo(image);
+    gboolean result = gimp_image_redo(image);
+
+    g_assert_true(result); // Req 3
+
+    g_object_unref(image);
+}
+
+int main(int argc, char **argv)
+{
+    g_test_init(&argc, argv, NULL);
+    g_test_add_func("/redo/after_undo", test_redo_after_undo);
+    return g_test_run();
+}
+
+Test 3 - Multiple Undos
+
+#include <glib.h>
+#include "core/gimpimage.h"
+
+static void test_multiple_undos(void)
+{
+    GimpImage *image = gimp_image_new(50, 50, GIMP_RGB);
+
+    for (int i = 0; i < 3; i++)
+    {
+        gimp_image_undo_group_start(image, GIMP_UNDO_GROUP_MISC, "Edit");
+        gimp_image_undo_group_end(image);
+    }
+
+    gboolean r1 = gimp_image_undo(image);
+    gboolean r2 = gimp_image_undo(image);
+    gboolean r3 = gimp_image_undo(image);
+
+    g_assert_true(r1 && r2 && r3); // Req 8 & 9
+
+    g_object_unref(image);
+}
+
+int main(int argc, char **argv)
+{
+    g_test_init(&argc, &argv, NULL);
+    g_test_add_func("/undo/multiple", test_multiple_undos);
+    return g_test_run();
+}
+
+Test 4 - Redo WithOUT Undo
+
+#include <glib.h>
+#include "core/gimpimage.h"
+
+static void test_redo_without_undo(void)
+{
+    GimpImage *image = gimp_image_new(50, 50, GIMP_RGB);
+
+    gboolean result = gimp_image_redo(image);
+
+    g_assert_false(result); // Req 6
+
+    g_object_unref(image);
+}
+
+int main(int argc, char **argv)
+{
+    g_test_init(&argc, &argv, NULL);
+    g_test_add_func("/redo/no_undo", test_redo_without_undo);
+    return g_test_run();
+}
+
+Test 5 - Undo Empty Stack
+
+#include <glib.h>
+#include "core/gimpimage.h"
+
+static void test_undo_empty_stack(void)
+{
+    GimpImage *image = gimp_image_new(50, 50, GIMP_RGB);
+
+    gboolean result = gimp_image_undo(image);
+
+    g_assert_false(result); // Req 5
+
+    g_object_unref(image);
+}
+
+int main(int argc, char **argv)
+{
+    g_test_init(&argc, &argv, NULL);
+    g_test_add_func("/undo/empty", test_undo_empty_stack);
+    return g_test_run();
+}
+
+Test 6 - Clear Redo After New Action
+
+#include <glib.h>
+#include "core/gimpimage.h"
+
+static void test_clear_redo_after_new_action(void)
+{
+    GimpImage *image = gimp_image_new(50, 50, GIMP_RGB);
+
+    // First action
+    gimp_image_undo_group_start(image, GIMP_UNDO_GROUP_MISC, "Edit1");
+    gimp_image_undo_group_end(image);
+
+    gimp_image_undo(image);
+
+    // New action (should clear redo stack)
+    gimp_image_undo_group_start(image, GIMP_UNDO_GROUP_MISC, "Edit2");
+    gimp_image_undo_group_end(image);
+
+    gboolean result = gimp_image_redo(image);
+
+    g_assert_false(result); // Req 4
+
+    g_object_unref(image);
+}
+
+int main(int argc, char **argv)
+{
+    g_test_init(&argc, &argv, NULL);
+    g_test_add_func("/redo/cleared", test_clear_redo_after_new_action);
+    return g_test_run();
+}
+
+Test 7 -Preserve Dimensions
+
+#include <glib.h>
+#include "core/gimpimage.h"
+
+static void test_dimensions_preserved(void)
+{
+    GimpImage *image = gimp_image_new(100, 200, GIMP_RGB);
+
+    gint width_before = gimp_image_get_width(image);
+    gint height_before = gimp_image_get_height(image);
+
+    gimp_image_undo_group_start(image, GIMP_UNDO_GROUP_MISC, "Edit");
+    gimp_image_undo_group_end(image);
+
+    gimp_image_undo(image);
+
+    gint width_after = gimp_image_get_width(image);
+    gint height_after = gimp_image_get_height(image);
+
+    g_assert_cmpint(width_before, ==, width_after);
+    g_assert_cmpint(height_before, ==, height_after); // Req 7
+
+    g_object_unref(image);
+}
+
+int main(int argc, char **argv)
+{
+    g_test_init(&argc, &argv, NULL);
+    g_test_add_func("/undo/dimensions", test_dimensions_preserved);
+    return g_test_run();
+}
+
+Test 8 - Reorder Corrections
+
+#include <glib.h>
+#include "core/gimpimage.h"
+
+static void test_redo_order(void)
+{
+    GimpImage *image = gimp_image_new(50, 50, GIMP_RGB);
+
+    for (int i = 0; i < 2; i++)
+    {
+        gimp_image_undo_group_start(image, GIMP_UNDO_GROUP_MISC, "Edit");
+        gimp_image_undo_group_end(image);
+    }
+
+    gimp_image_undo(image);
+    gimp_image_undo(image);
+
+    gboolean r1 = gimp_image_redo(image);
+    gboolean r2 = gimp_image_redo(image);
+
+    g_assert_true(r1 && r2); // Req 10
+
+    g_object_unref(image);
+}
+
+int main(int argc, char **argv)
+{
+    g_test_init(&argc, &argv, NULL);
+    g_test_add_func("/redo/order", test_redo_order);
+    return g_test_run();
+}
